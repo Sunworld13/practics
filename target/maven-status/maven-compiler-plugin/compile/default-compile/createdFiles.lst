@@ -1,0 +1,4 @@
+org\example\practics\PracticsApplication.class
+org\example\practics\service\FileStorageService.class
+org\example\practics\controller\ApiController.class
+org\example\practics\model\RequestData.class
