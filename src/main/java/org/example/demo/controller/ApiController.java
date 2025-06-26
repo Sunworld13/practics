@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -75,6 +76,7 @@ public class ApiController {
         }
     }
 
+
     private String getCellValueAsString(Cell cell) {
         if (cell == null) return "";
         switch (cell.getCellType()) {
@@ -86,6 +88,36 @@ public class ApiController {
                 return String.valueOf(cell.getBooleanCellValue());
             default:
                 return "";
+        }
+    }
+    @PostMapping("/upload-csv")
+    public ResponseEntity<String> uploadCsv(@RequestParam("file") MultipartFile file) {
+        try {
+            // 1. Обработка CSV файла
+            List<RequestData> dataList = fileStorageService.processCsvFile(file);
+
+            // 2. Проверка наличия данных
+//            if (dataList.isEmpty()) {
+//                return ResponseEntity.badRequest().body("CSV файл не содержит данных или имеет неверный формат");
+//            }
+
+            // 3. Сохранение в JSON
+            String resultPath = fileStorageService.saveCsvData(dataList);
+
+            return ResponseEntity.ok("Данные успешно обработаны и сохранены в: " + resultPath);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body("Ошибка обработки CSV файла: " + e.getMessage());
+        }
+    }
+    @PostMapping("/csv-to-json")
+    public ResponseEntity<String> convertCsvToJson(@RequestBody String csvContent) {
+        try {
+            String result = fileStorageService.convertCsvToJson(csvContent);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Ошибка преобразования: " + e.getMessage());
         }
     }
 }
